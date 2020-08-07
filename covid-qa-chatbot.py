@@ -248,8 +248,8 @@ class CovidQAChatbot(object):
         log.debug(f'Leaving: "{inspect.currentframe().f_code.co_name}"')
 
     def load_model(self):
-        log.debug(f'Entering: "{inspect.currentframe().f_code.co_name}"')
         """Loads the model"""
+        log.debug(f'Entering: "{inspect.currentframe().f_code.co_name}"')
         # This library lets you use Universal Sentence Encoder embeddings of Docs, Spans and Tokens
         # directly from TensorFlow Hub
         self.nlp_for_sent_similarity = spacy_universal_sentence_encoder.load_model('en_use_lg')
@@ -276,7 +276,7 @@ class CovidQAChatbot(object):
 
         # Replace all occurance of below names of corona with covid-19 (This is necessary to keep
         # consistency everywhere - In Dataframe columns, In user question)
-        for disease in ['covid', 'corona', 'covid19']:
+        for disease in ['covid', 'corona', 'covid19', 'covid-19-19']:
             new_string = new_string.replace(disease, 'covid-19')
 
         words = word_tokenize(new_string)
@@ -341,7 +341,7 @@ class CovidQAChatbot(object):
         log.debug(f'Entering: "{inspect.currentframe().f_code.co_name}"')
         self.df['sim'] = ''
         user_question = self.clean_sentence(user_question)
-        self.df['sim'] = self.df['title'].swifter.apply(
+        self.df['sim'] = self.df['clean_title'].swifter.apply(
             self.sentence_similarity,
             args=(user_question,)
         )
@@ -356,7 +356,7 @@ class CovidQAChatbot(object):
 
         """
         log.debug(f'Entering: "{inspect.currentframe().f_code.co_name}"')
-        user_question = user_question.lower()
+        user_question = self.clean_sentence(user_question)
         lemma = WordNetLemmatizer()
         noun_verb_list = [
             ent.text for ent in self.nlp_for_user_question(user_question) if (ent.pos_ in ['NOUN', 'VERB', 'ADJ'])
